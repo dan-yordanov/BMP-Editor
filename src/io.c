@@ -6,7 +6,7 @@
 
 
 
-char* get_input_path(int argc, char *argv[], char *input_path)
+void get_input_path(int argc, char *argv[], char *input_path)
 {
 	// if argument was given use it
 	if (argc > 1)
@@ -42,11 +42,17 @@ char* get_input_path(int argc, char *argv[], char *input_path)
 			}
 		}
 	}
+	// check if input file has a .bmp extension
+	if (strcmp(&input_path[strlen(input_path) - 4], ".bmp") != 0)
+	{
+		fprintf(stderr, "Error: input file is not bmp\n");
+		exit(IO_ERROR);
+	}
 }
 
 
 
-char* get_output_path(int argc, char *argv[], char *output_path)
+void get_output_path(int argc, char *argv[], char *output_path)
 {
 	//if argument was given use it
 	if (argc > 2)
@@ -86,14 +92,14 @@ char* get_output_path(int argc, char *argv[], char *output_path)
 	// check if output file has a .bmp extension
 	if (strcmp(&output_path[strlen(output_path) - 4], ".bmp") != 0)
 	{
-		fprintf(stderr, "Error: ouput file is not bmp\n");
+		fprintf(stderr, "Error: output file is not bmp\n");
 		exit(IO_ERROR);
 	}
 }
 
 
 
-char* get_instructions(int argc, char *argv[], char *instructions)
+void get_instructions(int argc, char *argv[], char *instructions)
 {
 	// if argument was given use it
 	if (argc > 3)

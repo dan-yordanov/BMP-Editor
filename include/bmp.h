@@ -20,11 +20,11 @@ typedef int32_t  LONG;  // 4 bytes (signed)
 
 typedef struct 
 {
-	WORD  biType;      // 2 bytes + 2 bytes padding (must be "BM")
-	DWORD biSize;      // 4 bytes
-	WORD  biReserved1; // 2 bytes
-	WORD  biReserved2; // 2 bytes
-	DWORD biOffset;	   // 4 bytes
+	WORD  bfType;      // 2 bytes + 2 bytes padding (must be "BM")
+	DWORD bfSize;      // 4 bytes
+	WORD  bfReserved1; // 2 bytes (should be 0)
+	WORD  bfReserved2; // 2 bytes (should be 0)
+	DWORD bfOffset;	   // 4 bytes
 } BITMAPFILEHEADER;
 
 // Window BITMAPINFOHEADER - the DIB header we're working with

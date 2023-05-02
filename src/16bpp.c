@@ -5,12 +5,28 @@
 
 
 
-void get_pixelarr_16bpp(FILE *bmp_in, char *input_path, Image_16bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth)
+void free_pixel_arr_16bpp(Image_16bpp *Image)
 {
+	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
+	free(Image->pixel_arr);
+}
+
+
+
+void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
+{
+	// 16 bpp images shouldn't have a color table so bfOffset should be equal to sum header sizes
+	if (bfOffset != BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE)
+	{
+		fprintf(stderr, "Error: 16 bpp images shouldn't have a color table or other data between headers and pixel array\n");
+		fclose(bmp_in);
+		exit(BPP_ERROR);
+	}
+
 	Image->height = abs(biHeight); // biHeight and biWidth can be negative meaning the rows/colums should be read in reverse
 	Image->width = abs(biWidth);
 
-	fseek(bmp_in, biOffset, SEEK_SET);
+	fseek(bmp_in, bfOffset, SEEK_SET);
 
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4))
 	uint8_t padding = (4 - (biWidth * 16 / 8) % 4) % 4;
@@ -65,19 +81,19 @@ void get_pixelarr_16bpp(FILE *bmp_in, char *input_path, Image_16bpp *Image, DWOR
 	{
 		flip_16bpp(Image);
 	}
-	
 
 	// reversing row order if height is negative (rotating twice and flipping)
 	if (biHeight < 0)
 	{
-		rotate_16bpp(Image); rotate_16bpp(Image); flip_16bpp(Image);
+		if (rotate_16bpp(Image) != 0 || rotate_16bpp(Image) != 0)
+		{
+			perror("Error rotating image to compensate for negative height");
+			fclose(bmp_in);
+			free_pixel_arr_16bpp(Image);
+			exit(BPP_ERROR);
+		}
+		flip_16bpp(Image);
 	}
-}
-
-void free_pixel_arr_16bpp(Image_16bpp *Image)
-{
-	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
-	free(Image->pixel_arr);
 }
 
 
@@ -196,20 +212,19 @@ void do_instructions_16bpp(FILE *bmp_in, char *instructions, Image_16bpp *Image)
 
 
 
-void write_16bpp(FILE *bmp_in, char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
+void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 {
 	FILE *bmp_out = fopen(output_path, "wb");
 	if (bmp_out == NULL)
 	{
-		perror("Failed to open output file");
-		fclose(bmp_in);
+		perror("Error failed to open output file");
 		free_pixel_arr_16bpp(Image);
 		exit(BPP_ERROR);
 	}
 
 	// changing header and dheader info
 	
-	// the only thing that can change in header is biSize and the things that can change in dheader are biWidth, biHeight, biSizeImage
+	// the only thing that can change in header is bfSize and the things that can change in dheader are biWidth, biHeight, biSizeImage
 	dheader->biHeight = Image->height;
 	dheader->biWidth = Image->width;
 	
@@ -217,55 +232,28 @@ void write_16bpp(FILE *bmp_in, char *output_path, Image_16bpp *Image, BITMAPFILE
 	uint8_t padding_bytes = (4 - (Image->width * 16 / 8) % 4) % 4;
 	dheader->biSizeImage = abs(dheader->biHeight) * (abs(dheader->biWidth) * sizeof(Pixel_16bpp) + padding_bytes); // includes only pixel array size
 	
-	// we don't have anything after the pixel array so all the metadata is stored before the biOffset
-	header->biSize = dheader->biSizeImage + header->biOffset; // includes size of metadata as well
+	// we don't have anything after the pixel array so all the metadata is stored before the bfOffset
+	header->bfSize = dheader->biSizeImage + header->bfOffset; // includes size of metadata as well
 
-
-	// not writing all at once to account for 2 bytes of padding after biType(2 bytes)
-	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->biSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
+	// not writing all at once to account for 2 bytes of padding after bfType(2 bytes)
+	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->bfSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
 	{
-		perror("Failed to write header");
-		fclose(bmp_in);
+		perror("Error failed to write header");
 		fclose(bmp_out);
 		free_pixel_arr_16bpp(Image);
 		exit(BPP_ERROR);
 	}
+
 
 	// writing dheader
 	if (fwrite(dheader, BITMAPINFOHEADER_SIZE, 1, bmp_out) < 1)
 	{
-		perror("Failed to write dheader");
-		fclose(bmp_in);
+		perror("Error failed to write dheader");
 		fclose(bmp_out);
 		free_pixel_arr_16bpp(Image);
 		exit(BPP_ERROR);
 	}
 
-	// writing everything between last byte of dheader and pixel array(gap1, color table if any)
-	fseek(bmp_in, 54, SEEK_SET);              // bmp_out is already at this postion            
-	
-	if (header->biOffset - 54 != 0)           // calculating byte count and if it's zero the pixel array starts right away
-	{
-		uint8_t buffer[header->biOffset - 54];  
-		while (ftell(bmp_in) < header->biOffset)
-		{
-			size_t read_count = fread(buffer, 1, sizeof(buffer), bmp_in);
-			if (read_count > 0) 
-			{
-				size_t write_count = fwrite(buffer, 1, read_count, bmp_out);
-				if (write_count != read_count)
-				{
-					perror("Failed to write gap1/color table to output file");
-					fclose(bmp_in);
-					fclose(bmp_out);
-					free_pixel_arr_16bpp(Image);
-					exit(BPP_ERROR);
-				}
-			}
-		}
-	}
-
-	fclose(bmp_in);
 
 	// writing pixel array (last step as we don't have anything after it due to the paramters we're working with)
 	char padding[padding_bytes];       // making the padding array
@@ -273,19 +261,21 @@ void write_16bpp(FILE *bmp_in, char *output_path, Image_16bpp *Image, BITMAPFILE
 
 	for (int i = 0; i < Image->height; i++)
 	{
+		// writing row
 		for (int j = 0; j < Image->width; j++)
 		{
 			if (fwrite(&(Image->pixel_arr[i][j]), sizeof(Pixel_16bpp), 1, bmp_out) < 1)
 			{
-				perror("Failed to write pixel array to output file");
+				perror("Error failed to write pixel array to output file");
 				fclose(bmp_out);
 				free_pixel_arr_16bpp(Image);
 				exit(BPP_ERROR);
 			}
 		}
+		// writing padding
 		if (fwrite(padding, padding_bytes, 1, bmp_out) < 1 && padding_bytes != 0) // adding padding to the end of each row
 		{
-			perror("Failed to write padding to output file");
+			perror("Error failed to write padding to output file");
 			fclose(bmp_out);
 			free_pixel_arr_16bpp(Image);
 			exit(BPP_ERROR);

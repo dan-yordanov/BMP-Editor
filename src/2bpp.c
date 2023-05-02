@@ -5,7 +5,7 @@
 
 
 
-void get_pixelarr_2bpp(FILE *bmp_in, char *input_path, Image_2bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth)
+void get_pixelarr_2bpp(FILE *bmp_in, Image_2bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
 {
 
 }
@@ -47,7 +47,7 @@ void do_instructions_2bpp(FILE *bmp_in, char *instructions, Image_2bpp *Image)
 
 
 
-void write_2bpp(FILE *bmp_in, char *output_path, Image_2bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
+void write_2bpp(char *output_path, Image_2bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 {
 
 }

@@ -46,45 +46,51 @@ int main(int argc, char *argv[])
 		case 1:
 		{
 			Image_1bpp Image;
-			get_pixelarr_1bpp(bmp_in, input_path, &Image, header.biOffset, dheader.biHeight, dheader.biWidth);
+			get_pixelarr_1bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			do_instructions_1bpp(bmp_in, instructions, &Image);
-			write_1bpp(bmp_in, output_path, &Image, &header, &dheader);
+			fclose(bmp_in);	
+			write_1bpp(output_path, &Image, &header, &dheader);
 			free_pixel_arr_1bpp(&Image);
 			break;
 		}
 		case 2:
 		{
 			Image_2bpp Image;
-			get_pixelarr_2bpp(bmp_in, input_path, &Image, header.biOffset, dheader.biHeight, dheader.biWidth);
+			get_pixelarr_2bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			do_instructions_2bpp(bmp_in, instructions, &Image);
-			write_2bpp(bmp_in, output_path, &Image, &header, &dheader);
+			fclose(bmp_in);	
+			write_2bpp(output_path, &Image, &header, &dheader);
 			free_pixel_arr_2bpp(&Image);
 			break;
 		}
 		case 4:
 		{
 			Image_4bpp Image;
-			get_pixelarr_4bpp(bmp_in, input_path, &Image, header.biOffset, dheader.biHeight, dheader.biWidth);
+			get_pixelarr_4bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			do_instructions_4bpp(bmp_in, instructions, &Image);
-			write_4bpp(bmp_in, output_path, &Image, &header, &dheader);
+			fclose(bmp_in);	
+			write_4bpp(output_path, &Image, &header, &dheader);
 			free_pixel_arr_4bpp(&Image);
 			break;
 		}
 		case 8:
 		{
 			Image_8bpp Image;
-			get_pixelarr_8bpp(bmp_in, input_path, &Image, header.biOffset, dheader.biHeight, dheader.biWidth);
+			get_color_table_8bpp(bmp_in, &Image, dheader.biClrUsed);
+			get_pixelarr_8bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			do_instructions_8bpp(bmp_in, instructions, &Image);
-			write_8bpp(bmp_in, output_path, &Image, &header, &dheader);
+			fclose(bmp_in);	
+			write_8bpp(output_path, &Image, &header, &dheader);
 			free_pixel_arr_8bpp(&Image);
 			break;
 		}
 		case 16:
 		{
 			Image_16bpp Image;
-			get_pixelarr_16bpp(bmp_in, input_path, &Image, header.biOffset, dheader.biHeight, dheader.biWidth);
-			do_instructions_16bpp(bmp_in, instructions, &Image);	
-			write_16bpp(bmp_in, output_path, &Image, &header, &dheader);
+			get_pixelarr_16bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
+			do_instructions_16bpp(bmp_in, instructions, &Image);
+			fclose(bmp_in);	
+			write_16bpp(output_path, &Image, &header, &dheader);
 			free_pixel_arr_16bpp(&Image);
 			break;
 		}	
@@ -95,8 +101,6 @@ int main(int argc, char *argv[])
 	// prints metadata of output bmp which is stored in now modified vars header and dheader
 	puts("\n\nOutput file metadata: ");
 	print_meta(&header, &dheader);
-
-	// both bmp_out and bmp_in get closed in the write function
 
 	return 0;
 }

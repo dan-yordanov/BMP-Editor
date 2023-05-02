@@ -3,10 +3,23 @@
 
 #include "bmp.h"
 
+#define RGBQUAD_SIZE 4
 #define BPP_ERROR 3
 
 
 // Pixel and PixelArr structs for different bpp values
+
+
+// RGBQUAD structure that's used in color tables (bpp <= 8 and uses little-endian)
+typedef struct
+{
+	BYTE blue;
+	BYTE green;
+	BYTE red;
+	BYTE reserved; // should be zero
+} RGBQUAD;
+
+
 
 // 1 bpp (uses color table)
 
@@ -68,11 +81,13 @@ typedef struct
 	DWORD height;                    // 4 bytes 
 	DWORD width;                     // 4 bytes
 	Pixel_8bpp **pixel_arr;          // 2D array of pixels
+	RGBQUAD *color_table;            // 1D array of RGBQUAD values
+	DWORD color_count;               // count of colors in color table
 } Image_8bpp;
 
 
 
-// 16 bpp (using RGB 555 format since compression is BI_RGB and sorting it as BGR as bmp uses little-endian byte ordering)
+// 16 bpp (using RGB 555 format since compression is BI_RGB and sorting it as BGR since bmp uses little-endian byte ordering)
 
 typedef struct
 {
@@ -94,7 +109,7 @@ typedef struct
 // functions for different bpp values
 
 // 1bpp
-void get_pixelarr_1bpp(FILE *bmp_in, char *input_path, Image_1bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth);
+void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
 void do_instructions_1bpp(FILE *bmp_in, char * instructions, Image_1bpp *Image);
 
 void flip_1bpp(Image_1bpp *Image);
@@ -103,11 +118,11 @@ int rotate_1bpp(Image_1bpp *Image);
 
 
 void free_pixel_arr_1bpp(Image_1bpp *Image);
-void write_1bpp(FILE *bmp_in, char *output_path, Image_1bpp *Image,  BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+void write_1bpp(char *output_path, Image_1bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 
 // 2bpp
-void get_pixelarr_2bpp(FILE *bmp_in, char *input_path, Image_2bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth);
+void get_pixelarr_2bpp(FILE *bmp_in, Image_2bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
 void do_instructions_2bpp(FILE *bmp_in, char * instructions, Image_2bpp *Image);
 
 void flip_2bpp(Image_2bpp *Image);
@@ -115,11 +130,11 @@ void invert_2bpp(Image_2bpp *Image);
 int rotate_2bpp(Image_2bpp *Image);
 
 void free_pixel_arr_2bpp(Image_2bpp *Image);
-void write_2bpp(FILE *bmp_in, char *output_path, Image_2bpp *Image,  BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+void write_2bpp(char *output_path, Image_2bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 
 // 4bpp
-void get_pixelarr_4bpp(FILE *bmp_in, char *input_path, Image_4bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth);
+void get_pixelarr_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
 void do_instructions_4bpp(FILE *bmp_in, char * instructions, Image_4bpp *Image);
 
 void flip_4bpp(Image_4bpp *Image);
@@ -127,11 +142,12 @@ void invert_4bpp(Image_4bpp *Image);
 int rotate_4bpp(Image_4bpp *Image);
 
 void free_pixel_arr_4bpp(Image_4bpp *Image);
-void write_4bpp(FILE *bmp_in, char *output_path, Image_4bpp *Image,  BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+void write_4bpp(char *output_path, Image_4bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 
 // 8bpp
-void get_pixelarr_8bpp(FILE *bmp_in, char *input_path, Image_8bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth);
+void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
+void get_color_table_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD biClrUsed);
 void do_instructions_8bpp(FILE *bmp_in, char * instructions, Image_8bpp *Image);
 
 void flip_8bpp(Image_8bpp *Image); 
@@ -139,11 +155,11 @@ void invert_8bpp(Image_8bpp *Image);
 int rotate_8bpp(Image_8bpp *Image);
 
 void free_pixel_arr_8bpp(Image_8bpp *Image);
-void write_8bpp(FILE *bmp_in, char *output_path, Image_8bpp *Image,  BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 
 // 16bpp
-void get_pixelarr_16bpp(FILE *bmp_in, char *input_path, Image_16bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth);
+void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
 void do_instructions_16bpp(FILE *bmp_in, char * instructions, Image_16bpp *Image);
 
 void flip_16bpp(Image_16bpp *Image);
@@ -151,6 +167,6 @@ void invert_16bpp(Image_16bpp *Image);
 int rotate_16bpp(Image_16bpp *Image);
 
 void free_pixel_arr_16bpp(Image_16bpp *Image);
-void write_16bpp(FILE *bmp_in, char *output_path, Image_16bpp *Image,  BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 #endif

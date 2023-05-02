@@ -5,12 +5,20 @@
 
 
 
-void get_pixelarr_8bpp(FILE *bmp_in, char *input_path, Image_8bpp *Image, DWORD biOffset, LONG biHeight, LONG biWidth)
+void free_pixel_arr_8bpp(Image_8bpp *Image)
+{
+	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
+	free(Image->pixel_arr);
+}
+
+
+
+void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
 {
 	Image->height = abs(biHeight); // biHeight and biWidth can be negative meaning the rows/colums should be read in reverse
 	Image->width = abs(biWidth);
 
-	fseek(bmp_in, biOffset, SEEK_SET);
+	fseek(bmp_in, bfOffset, SEEK_SET);
 
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4))
 	uint8_t padding = (4 - (biWidth * 8 / 8) % 4) % 4;
@@ -65,7 +73,6 @@ void get_pixelarr_8bpp(FILE *bmp_in, char *input_path, Image_8bpp *Image, DWORD 
 	{
 		flip_8bpp(Image);
 	}
-	
 
 	// reversing row order if height is negative (rotating twice and flipping)
 	if (biHeight < 0)
@@ -76,10 +83,39 @@ void get_pixelarr_8bpp(FILE *bmp_in, char *input_path, Image_8bpp *Image, DWORD 
 
 
 
-void free_pixel_arr_8bpp(Image_8bpp *Image)
+void get_color_table_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD biClrUsed)
 {
-	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
-	free(Image->pixel_arr);
+	// seek to right after headers
+	fseek(bmp_in, BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE, SEEK_SET);
+
+	// calculating color count
+	if (biClrUsed == 0)
+	{
+		// if biClrUsed is 0 that means the color count is the max possible for the bit count (2 ^ bpp)
+		Image->color_count = 256; // 2 ^ 8 = 256
+	}
+	else
+	{
+		Image->color_count = biClrUsed;
+	}
+
+	// alocating memory for the color table
+	Image->color_table = (RGBQUAD*) malloc(Image->color_count * RGBQUAD_SIZE);
+	if (Image->color_table == NULL)
+	{
+		perror("Error allocatng memory for pixel array");
+		fclose(bmp_in);
+		free(Image);
+		exit(BPP_ERROR);
+	}
+
+	if (fread(Image->color_table, RGBQUAD_SIZE, Image->color_count, bmp_in) < Image->color_count)
+	{
+		perror("Error reading color table");
+		fclose(bmp_in);
+		free(Image);
+		exit(BPP_ERROR);
+	}
 }
 
 
@@ -102,13 +138,12 @@ void flip_8bpp(Image_8bpp *Image)
 
 void invert_8bpp(Image_8bpp *Image)
 {
-	for (int i = 0; i < Image->height; i++)
+	for (int i = 0; i < Image->color_count; i++)
 	{
-		for  (int j = 0; j < Image->width; j++)
-		{
-			// inverting the byte
-			Image->pixel_arr[i][j].byte = ~Image->pixel_arr[i][j].byte;
-		}
+		// inverting only the colors and not the reserved byte
+		Image->color_table[i].red = ~Image->color_table[i].red;
+		Image->color_table[i].green = ~Image->color_table[i].green;
+		Image->color_table[i].blue = ~Image->color_table[i].blue;
 	}
 }
 
@@ -196,76 +231,70 @@ void do_instructions_8bpp(FILE *bmp_in, char *instructions, Image_8bpp *Image)
 
 
 
-void write_8bpp(FILE *bmp_in, char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
+void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 {
 	FILE *bmp_out = fopen(output_path, "wb");
 	if (bmp_out == NULL)
 	{
 		perror("Failed to open output file");
-		fclose(bmp_in);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
 
 	// changing header and dheader info
 	
-	// the only thing that can change in header is biSize and the things that can change in dheader are biWidth, biHeight, biSizeImage
+	// the only thing that can change in header is bfSize and the things that can change in dheader are biWidth, biHeight, biSizeImage
 	dheader->biHeight = Image->height;
 	dheader->biWidth = Image->width;
 	
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4)
 	uint8_t padding_bytes = (4 - (Image->width * 8 / 8) % 4) % 4;
-	dheader->biSizeImage = abs(dheader->biHeight) * (abs(dheader->biWidth) * sizeof(Pixel_8bpp) + padding_bytes); // ncludes only pixel array size
+	dheader->biSizeImage = abs(dheader->biHeight) * (abs(dheader->biWidth) * sizeof(Pixel_8bpp) + padding_bytes); // includes only pixel array size)
 	
-	// we don't have anything after the pixel array so all the metadata is stored before the biOffset
-	header->biSize = dheader->biSizeImage + header->biOffset; // includes size of metadata as well
+	// we don't have anything after the pixel array so all the metadata is stored before the bfOffset
+	header->bfSize = dheader->biSizeImage + header->bfOffset; // includes size of metadata as well
 
-
-	// not writing all at once to account for 2 bytes of padding after biType(2 bytes)
-	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->biSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
+	// not writing all at once to account for 2 bytes of padding after bfType(2 bytes)
+	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->bfSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
 	{
-		perror("Failed to write header");
-		fclose(bmp_in);
+		perror("Error failed to write header");
 		fclose(bmp_out);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
+
 
 	// writing dheader
 	if (fwrite(dheader, BITMAPINFOHEADER_SIZE, 1, bmp_out) < 1)
 	{
-		perror("Failed to write dheader");
-		fclose(bmp_in);
+		perror("Error failed to write dheader");
 		fclose(bmp_out);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
 
-	// writing everything between last byte of dheader and pixel array(gap1, color table if any)
-	fseek(bmp_in, 54, SEEK_SET);              // bmp_out is already at this postion            
-	
-	if (header->biOffset - 54 != 0)           // calculating byte count and if it's zero the pixel array starts right away
+
+	// writing color table and gap1
+	if (fwrite(Image->color_table, RGBQUAD_SIZE, Image->color_count, bmp_out) < Image->color_count)
 	{
-		uint8_t buffer[header->biOffset - 54];  
-		while (ftell(bmp_in) < header->biOffset)
-		{
-			size_t read_count = fread(buffer, 1, sizeof(buffer), bmp_in);
-			if (read_count > 0) 
-			{
-				size_t write_count = fwrite(buffer, 1, read_count, bmp_out);
-				if (write_count != read_count)
-				{
-					perror("Failed to write gap1/color table to output file");
-					fclose(bmp_in);
-					fclose(bmp_out);
-					free_pixel_arr_8bpp(Image);
-					exit(BPP_ERROR);
-				}
-			}
-		}
+		perror("Error failed to write color table to output file");
+		fclose(bmp_out);
+		free_pixel_arr_8bpp(Image);
+		exit(BPP_ERROR);
 	}
 
-	fclose(bmp_in);
+	// writing Gap1 between color table and pixel array if there is one
+	// the differnce between the pixel array offset and the headers + color table size gives the size of Gap1 in bytes
+	// NOTE: we don't have to worry about Gap2 which comes after the pixel array as we don't use ICC
+	int Gap1_bytes = header->bfOffset - (BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE + RGBQUAD_SIZE * Image->color_count);
+	if (fwrite(0, 1, Gap1_bytes, bmp_out) < Gap1_bytes)
+	{
+		perror("Error failed to write Gap1 to output file");
+		fclose(bmp_out);
+		free_pixel_arr_8bpp(Image);
+		exit(BPP_ERROR);
+	}
+
 
 	// writing pixel array (last step as we don't have anything after it due to the paramters we're working with)
 	char padding[padding_bytes];       // making the padding array
@@ -273,19 +302,21 @@ void write_8bpp(FILE *bmp_in, char *output_path, Image_8bpp *Image, BITMAPFILEHE
 
 	for (int i = 0; i < Image->height; i++)
 	{
+		// writing row
 		for (int j = 0; j < Image->width; j++)
 		{
 			if (fwrite(&(Image->pixel_arr[i][j]), sizeof(Pixel_8bpp), 1, bmp_out) < 1)
 			{
-				perror("Failed to write pixel array to output file");
+				perror("Error failed to write pixel array to output file");
 				fclose(bmp_out);
 				free_pixel_arr_8bpp(Image);
 				exit(BPP_ERROR);
 			}
 		}
+		// writing padding
 		if (fwrite(padding, padding_bytes, 1, bmp_out) < 1 && padding_bytes != 0) // adding padding to the end of each row
 		{
-			perror("Failed to write padding to output file");
+			perror("Error failed to write padding to output file");
 			fclose(bmp_out);
 			free_pixel_arr_8bpp(Image);
 			exit(BPP_ERROR);

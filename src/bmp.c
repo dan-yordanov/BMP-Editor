@@ -18,7 +18,7 @@ void print_meta(BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 			"biReserved2: %d\n"
 			"biOffset: %d\n"
 			"=================================\n",
-			((char *)header)[0], ((char *)header)[1], header->biSize, header->biReserved1, header->biReserved2, header->biOffset);
+			((char *)header)[0], ((char *)header)[1], header->bfSize, header->bfReserved1, header->bfReserved2, header->bfOffset);
 
 	// prints dheader info
 	printf(	"\n"
@@ -54,11 +54,11 @@ void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 		exit(BMP_ERROR);
 	}
 	
-	// check whether first two bytes are 'BM'
-	uint16_t biType_hex;
-	memcpy(&biType_hex, "BM", sizeof(biType_hex));
+	// check whether first two bytes are "BM"
+	uint16_t bfType_hex;
+	memcpy(&bfType_hex, "BM", sizeof(bfType_hex));
 
-	if (header->biType != biType_hex) 
+	if (header->bfType != bfType_hex) 
 	{
 		fclose(bmp_in);
 		fprintf(stderr, "Error: file type is not BMP\n");
@@ -66,7 +66,7 @@ void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 	}
 	
 	// read rest of the 12 bytes
-	if (fread(&(header->biSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_in) < 1) 
+	if (fread(&(header->bfSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_in) < 1) 
 	{
 		perror("Error reading header");
 		fclose(bmp_in);
