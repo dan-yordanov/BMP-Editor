@@ -5,14 +5,22 @@
 
 
 
-void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
+void free_pixel_arr_1bpp(Image_1bpp *Image)
+{
+	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
+	free(Image->pixel_arr);
+}
+
+
+
+void get_color_table_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD biClrUsed)
 {
 
 }
 
 
 
-void free_pixel_arr_1bpp(Image_1bpp *Image)
+void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
 {
 
 }
@@ -40,7 +48,7 @@ int rotate_1bpp(Image_1bpp *Image)
 
 
 
-void do_instructions_1bpp(FILE *bmp_in, char *instructions, Image_1bpp *Image)
+void do_instructions_1bpp(char *instructions, Image_1bpp *Image)
 {
 
 }

@@ -113,4 +113,12 @@ void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 		fprintf(stderr, "Error: only BI_RGB compression method is supported\n");
 		exit(BMP_ERROR);
 	}
+
+	// check whether 16bpp image has color table info
+	if (dheader->biBitCount == 16 && (dheader->biClrUsed != 0 || dheader->biClrImportant != 0))
+	{
+		fclose(bmp_in);
+		fprintf(stderr, "Error: 16bpp images shouldn't have a color table\n");
+		exit(BMP_ERROR);
+	}
 }

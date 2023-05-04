@@ -13,12 +13,48 @@ void free_pixel_arr_8bpp(Image_8bpp *Image)
 
 
 
+void get_color_table_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD biClrUsed)
+{
+	// seek to right after headers
+	fseek(bmp_in, BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE, SEEK_SET);
+
+	// calculating color count
+	if (biClrUsed == 0)
+	{
+		// if biClrUsed is 0 that means the color count is the max possible for the bit count (2 ^ bpp)
+		Image->color_count = 256; // 2 ^ 8 = 256
+	}
+	else
+	{
+		Image->color_count = biClrUsed;
+	}
+
+	// alocating memory for the color table
+	Image->color_table = (RGBQUAD*) malloc(Image->color_count * RGBQUAD_SIZE);
+	if (Image->color_table == NULL)
+	{
+		perror("Error allocatng memory for pixel array");
+		fclose(bmp_in);
+		exit(BPP_ERROR);
+	}
+
+	if (fread(Image->color_table, RGBQUAD_SIZE, Image->color_count, bmp_in) < Image->color_count)
+	{
+		perror("Error reading color table");
+		fclose(bmp_in);
+		free(Image->color_table);
+		exit(BPP_ERROR);
+	}
+}
+
+
+
 void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
 {
+	fseek(bmp_in, bfOffset, SEEK_SET);
+
 	Image->height = abs(biHeight); // biHeight and biWidth can be negative meaning the rows/colums should be read in reverse
 	Image->width = abs(biWidth);
-
-	fseek(bmp_in, bfOffset, SEEK_SET);
 
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4))
 	uint8_t padding = (4 - (biWidth * 8 / 8) % 4) % 4;
@@ -29,6 +65,7 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 	{
 		perror("Error allocatng memory for pixel array");
 		fclose(bmp_in);
+		free(Image->color_table);
 		exit(BPP_ERROR);
 	}
 
@@ -39,6 +76,7 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 		{
 			perror("Error allocatng memory for pixel array row");
 			fclose(bmp_in);
+			free(Image->color_table);
 			// freeing all previous rows
 			for (int r = i - 1; r >= 0; r--) 
 			{
@@ -53,6 +91,7 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 		{
 			perror("Error writing pixel array row");
 			fclose(bmp_in);
+			free(Image->color_table);
 			// freeing all rows up to current one
 			for (int r = i; r >= 0; r--) 
 			{
@@ -77,44 +116,15 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 	// reversing row order if height is negative (rotating twice and flipping)
 	if (biHeight < 0)
 	{
-		rotate_8bpp(Image); rotate_8bpp(Image); flip_8bpp(Image);
-	}
-}
-
-
-
-void get_color_table_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD biClrUsed)
-{
-	// seek to right after headers
-	fseek(bmp_in, BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE, SEEK_SET);
-
-	// calculating color count
-	if (biClrUsed == 0)
-	{
-		// if biClrUsed is 0 that means the color count is the max possible for the bit count (2 ^ bpp)
-		Image->color_count = 256; // 2 ^ 8 = 256
-	}
-	else
-	{
-		Image->color_count = biClrUsed;
-	}
-
-	// alocating memory for the color table
-	Image->color_table = (RGBQUAD*) malloc(Image->color_count * RGBQUAD_SIZE);
-	if (Image->color_table == NULL)
-	{
-		perror("Error allocatng memory for pixel array");
-		fclose(bmp_in);
-		free(Image);
-		exit(BPP_ERROR);
-	}
-
-	if (fread(Image->color_table, RGBQUAD_SIZE, Image->color_count, bmp_in) < Image->color_count)
-	{
-		perror("Error reading color table");
-		fclose(bmp_in);
-		free(Image);
-		exit(BPP_ERROR);
+		if (rotate_8bpp(Image) != 0 || rotate_8bpp(Image) != 0)
+		{
+			perror("Error rotating image to compensate for negative height");
+			fclose(bmp_in);
+			free(Image->pixel_arr);
+			free_pixel_arr_8bpp(Image);
+			exit(BPP_ERROR);
+		}
+		flip_8bpp(Image);
 	}
 }
 
@@ -195,7 +205,7 @@ int rotate_8bpp(Image_8bpp *Image)
 
 
 
-void do_instructions_8bpp(FILE *bmp_in, char *instructions, Image_8bpp *Image)
+void do_instructions_8bpp(char *instructions, Image_8bpp *Image)
 {
 	for (int i = 0; i < strlen(instructions); i++)
 	{
@@ -213,7 +223,7 @@ void do_instructions_8bpp(FILE *bmp_in, char *instructions, Image_8bpp *Image)
 				if (rotate_8bpp(Image) != 0)
 				{
 					perror("Error rotating image");
-					fclose(bmp_in);
+					free(Image->color_table);
 					free_pixel_arr_8bpp(Image);
 					exit(BPP_ERROR);
 				}
@@ -237,6 +247,7 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 	if (bmp_out == NULL)
 	{
 		perror("Failed to open output file");
+		free(Image->color_table);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
@@ -259,6 +270,7 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 	{
 		perror("Error failed to write header");
 		fclose(bmp_out);
+		free(Image->color_table);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
@@ -269,6 +281,7 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 	{
 		perror("Error failed to write dheader");
 		fclose(bmp_out);
+		free(Image->color_table);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
@@ -279,9 +292,13 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 	{
 		perror("Error failed to write color table to output file");
 		fclose(bmp_out);
+		free(Image->color_table);
 		free_pixel_arr_8bpp(Image);
 		exit(BPP_ERROR);
 	}
+
+	free(Image->color_table);
+
 
 	// writing Gap1 between color table and pixel array if there is one
 	// the differnce between the pixel array offset and the headers + color table size gives the size of Gap1 in bytes
@@ -322,6 +339,8 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 			exit(BPP_ERROR);
 		}
 	}
+
+	free_pixel_arr_8bpp(Image);
 
 	fclose(bmp_out);
 }

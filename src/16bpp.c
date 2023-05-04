@@ -23,10 +23,11 @@ void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG b
 		exit(BPP_ERROR);
 	}
 
+	
+	fseek(bmp_in, bfOffset, SEEK_SET);
+
 	Image->height = abs(biHeight); // biHeight and biWidth can be negative meaning the rows/colums should be read in reverse
 	Image->width = abs(biWidth);
-
-	fseek(bmp_in, bfOffset, SEEK_SET);
 
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4))
 	uint8_t padding = (4 - (biWidth * 16 / 8) % 4) % 4;
@@ -176,7 +177,7 @@ int rotate_16bpp(Image_16bpp *Image)
 
 
 
-void do_instructions_16bpp(FILE *bmp_in, char *instructions, Image_16bpp *Image)
+void do_instructions_16bpp(char *instructions, Image_16bpp *Image)
 {
 	for (int i = 0; i < strlen(instructions); i++)
 	{
@@ -194,7 +195,6 @@ void do_instructions_16bpp(FILE *bmp_in, char *instructions, Image_16bpp *Image)
 				if (rotate_16bpp(Image) != 0)
 				{
 					perror("Error rotating image");
-					fclose(bmp_in);
 					free_pixel_arr_16bpp(Image);
 					exit(BPP_ERROR);
 				}
@@ -281,6 +281,8 @@ void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header
 			exit(BPP_ERROR);
 		}
 	}
+
+	free_pixel_arr_16bpp(Image);
 
 	fclose(bmp_out);
 }

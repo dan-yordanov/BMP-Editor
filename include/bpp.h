@@ -30,9 +30,11 @@ typedef struct
 
 typedef struct
 {
-	DWORD height;                   // 4 bytes 
-	DWORD width;                    // 4 bytes
-	Pixel_1bpp **pixel_arr;         // 2D array of pixels
+	DWORD height; 
+	DWORD width;
+	Pixel_1bpp **pixel_arr;          // 2D array of pixels
+	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
+	DWORD color_count;               // count of colors in color table
 } Image_1bpp;
 
 
@@ -46,9 +48,11 @@ typedef struct
 
 typedef struct
 {
-	DWORD height;                   // 4 bytes 
-	DWORD width;                    // 4 bytes
-	Pixel_2bpp **pixel_arr;         // 2D array of pixels
+	DWORD height; 
+	DWORD width;
+	Pixel_2bpp **pixel_arr;          // 2D array of pixels
+	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
+	DWORD color_count;               // count of colors in color table
 } Image_2bpp;
 
 
@@ -62,9 +66,11 @@ typedef struct
 
 typedef struct
 {
-	DWORD height;                   // 4 bytes 
-	DWORD width;                    // 4 bytes
-	Pixel_4bpp **pixel_arr;         // 2D array of pixels
+	DWORD height; 
+	DWORD width;
+	Pixel_4bpp **pixel_arr;          // 2D array of pixels
+	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
+	DWORD color_count;               // count of colors in color table
 } Image_4bpp;
 
 
@@ -78,10 +84,10 @@ typedef struct
 
 typedef struct
 {
-	DWORD height;                    // 4 bytes 
-	DWORD width;                     // 4 bytes
+	DWORD height; 
+	DWORD width;
 	Pixel_8bpp **pixel_arr;          // 2D array of pixels
-	RGBQUAD *color_table;            // 1D array of RGBQUAD values
+	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
 	DWORD color_count;               // count of colors in color table
 } Image_8bpp;
 
@@ -94,13 +100,13 @@ typedef struct
 	WORD blue : 5;       // 5 bits for red component
 	WORD green : 5;      // 5 bits for green component
 	WORD red : 5;        // 5 bits for blue component (+1 unused bit)
-	WORD unused_bit: 1;  // 1 bit unused
+	WORD unused_bit: 1;  // 1 bit unused (should be 0)
 } Pixel_16bpp;
 
 typedef struct 
 {
-	DWORD height;                    // 4 bytes 
-	DWORD width;                     // 4 bytes
+	DWORD height; 
+	DWORD width;
 	Pixel_16bpp **pixel_arr;         // 2D array of pixels
 } Image_16bpp;
 
@@ -109,8 +115,9 @@ typedef struct
 // functions for different bpp values
 
 // 1bpp
+void get_color_table_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD biClrUsed);
 void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
-void do_instructions_1bpp(FILE *bmp_in, char * instructions, Image_1bpp *Image);
+void do_instructions_1bpp(char * instructions, Image_1bpp *Image);
 
 void flip_1bpp(Image_1bpp *Image);
 void invert_1bpp(Image_1bpp *Image);
@@ -122,8 +129,9 @@ void write_1bpp(char *output_path, Image_1bpp *Image, BITMAPFILEHEADER *header, 
 
 
 // 2bpp
+void get_color_table_2bpp(FILE *bmp_in, Image_2bpp *Image, DWORD biClrUsed);
 void get_pixelarr_2bpp(FILE *bmp_in, Image_2bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
-void do_instructions_2bpp(FILE *bmp_in, char * instructions, Image_2bpp *Image);
+void do_instructions_2bpp(char * instructions, Image_2bpp *Image);
 
 void flip_2bpp(Image_2bpp *Image);
 void invert_2bpp(Image_2bpp *Image);
@@ -134,8 +142,9 @@ void write_2bpp(char *output_path, Image_2bpp *Image, BITMAPFILEHEADER *header, 
 
 
 // 4bpp
+void get_color_table_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD biClrUsed);
 void get_pixelarr_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
-void do_instructions_4bpp(FILE *bmp_in, char * instructions, Image_4bpp *Image);
+void do_instructions_4bpp(char * instructions, Image_4bpp *Image);
 
 void flip_4bpp(Image_4bpp *Image);
 void invert_4bpp(Image_4bpp *Image);
@@ -146,9 +155,9 @@ void write_4bpp(char *output_path, Image_4bpp *Image, BITMAPFILEHEADER *header, 
 
 
 // 8bpp
-void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
 void get_color_table_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD biClrUsed);
-void do_instructions_8bpp(FILE *bmp_in, char * instructions, Image_8bpp *Image);
+void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
+void do_instructions_8bpp(char * instructions, Image_8bpp *Image);
 
 void flip_8bpp(Image_8bpp *Image); 
 void invert_8bpp(Image_8bpp *Image);
@@ -160,7 +169,7 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 
 // 16bpp
 void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
-void do_instructions_16bpp(FILE *bmp_in, char * instructions, Image_16bpp *Image);
+void do_instructions_16bpp(char * instructions, Image_16bpp *Image);
 
 void flip_16bpp(Image_16bpp *Image);
 void invert_16bpp(Image_16bpp *Image);
