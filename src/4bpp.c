@@ -15,7 +15,7 @@ void free_pixel_arr_4bpp(Image_4bpp *Image)
 
 void get_color_table_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD biClrUsed)
 {
-
+	
 }
 
 

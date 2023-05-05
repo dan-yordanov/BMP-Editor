@@ -74,6 +74,7 @@ void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG b
 		fseek(bmp_in, padding, SEEK_CUR); // skipping padding bytes
 	}
 
+
 	// we'll always set height and width in the output file header to be postive, to account for this we'll need to:
 	// if width is negative flip the image, if height is negative reverse the row order
 
@@ -222,6 +223,7 @@ void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header
 		exit(BPP_ERROR);
 	}
 
+
 	// changing header and dheader info
 	
 	// the only thing that can change in header is bfSize and the things that can change in dheader are biWidth, biHeight, biSizeImage
@@ -230,7 +232,7 @@ void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header
 	
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4)
 	uint8_t padding_bytes = (4 - (Image->width * 16 / 8) % 4) % 4;
-	dheader->biSizeImage = abs(dheader->biHeight) * (abs(dheader->biWidth) * sizeof(Pixel_16bpp) + padding_bytes); // includes only pixel array size
+	dheader->biSizeImage = dheader->biHeight * (dheader->biWidth * sizeof(Pixel_16bpp) + padding_bytes); // includes only pixel array size
 	
 	// we don't have anything after the pixel array so all the metadata is stored before the bfOffset
 	header->bfSize = dheader->biSizeImage + header->bfOffset; // includes size of metadata as well

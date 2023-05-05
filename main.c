@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 		case 1:
 		{
 			Image_1bpp Image;
-			
+			get_color_table_1bpp(bmp_in, &Image, dheader.biClrUsed);
 			get_pixelarr_1bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			fclose(bmp_in);
 			do_instructions_1bpp(instructions, &Image);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 		case 2:
 		{
 			Image_2bpp Image;
-			
+			get_color_table_2bpp(bmp_in, &Image, dheader.biClrUsed);
 			get_pixelarr_2bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			fclose(bmp_in);
 			do_instructions_2bpp(instructions, &Image);	
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 		case 4:
 		{
 			Image_4bpp Image;
-			
+			get_color_table_4bpp(bmp_in, &Image, dheader.biClrUsed);
 			get_pixelarr_4bpp(bmp_in, &Image, header.bfOffset, dheader.biHeight, dheader.biWidth);
 			fclose(bmp_in);
 			do_instructions_4bpp(instructions, &Image);	

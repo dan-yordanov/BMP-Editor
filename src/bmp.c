@@ -12,11 +12,11 @@ void print_meta(BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 	printf( "\n"
 			"=================================\n"
 			"BITMAPFILEHEADER data:\n\n"
-			"biType: %c%c\n"
-			"biSize: %d\n"
-			"biReserved1: %d\n"
-			"biReserved2: %d\n"
-			"biOffset: %d\n"
+			"bfType: %c%c\n"
+			"bfSize: %d\n"
+			"bfReserved1: %d\n"
+			"bfReserved2: %d\n"
+			"bfOffset: %d\n"
 			"=================================\n",
 			((char *)header)[0], ((char *)header)[1], header->bfSize, header->bfReserved1, header->bfReserved2, header->bfOffset);
 
