@@ -237,6 +237,7 @@ void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header
 	// we don't have anything after the pixel array so all the metadata is stored before the bfOffset
 	header->bfSize = dheader->biSizeImage + header->bfOffset; // includes size of metadata as well
 
+	
 	// not writing all at once to account for 2 bytes of padding after bfType(2 bytes)
 	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->bfSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
 	{
@@ -256,6 +257,7 @@ void write_16bpp(char *output_path, Image_16bpp *Image, BITMAPFILEHEADER *header
 		exit(BPP_ERROR);
 	}
 
+	// we don't have Gap1 as when we have no color table so the pixel array offset is aligned by default
 
 	// writing pixel array (last step as we don't have anything after it due to the paramters we're working with)
 	char padding[padding_bytes];       // making the padding array

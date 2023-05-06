@@ -107,16 +107,18 @@ void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biH
 		}
 
 		// iterating over each byte and the each bit in it, breaking when last bit is reached
-		int bit; // declaring it here so we can break outer loop
+		uint32_t counter = 0; // counts how many bits have been written, will break out of loop when it reaches biWidth
+		
 		for (int byte = 0; byte < row_size; byte++)
 		{
-			for (bit = 0; bit < 8; bit++)
+			for (int bit = 0; bit < 8; bit++)
 			{
 				// shifting and masking
 				(Image->pixel_arr[i][byte * 8 + bit]).bit = (buffer[byte] >> (7 - bit)) & 1;
-				if (byte * 8 + bit + 1 == biWidth) break;
+				counter++;
+				if (counter == biWidth) break;
 			}
-			if (byte * 8 + bit + 1 == biWidth) break;
+			if (counter == biWidth) break;
 		}
 
 		fseek(bmp_in, bfOffset + row_size * (i + 1), SEEK_SET); // going to respectful row
@@ -284,6 +286,7 @@ void write_1bpp(char *output_path, Image_1bpp *Image, BITMAPFILEHEADER *header, 
 	// we don't have anything after the pixel array so all the metadata is stored before the bfOffset
 	header->bfSize = dheader->biSizeImage + header->bfOffset; // includes size of metadata as well
 
+	
 	// not writing all at once to account for 2 bytes of padding after bfType(2 bytes)
 	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->bfSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
 	{
@@ -322,7 +325,7 @@ void write_1bpp(char *output_path, Image_1bpp *Image, BITMAPFILEHEADER *header, 
 	// writing Gap1 between color table and pixel array if there is one
 	// the differnce between the pixel array offset and the headers + color table size gives the size of Gap1 in bytes
 	// NOTE: we don't have to worry about Gap2 which comes after the pixel array as we don't use ICC
-	int Gap1_bytes = header->bfOffset - (BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE + RGBQUAD_SIZE * Image->color_count);
+	uint8_t Gap1_bytes = header->bfOffset - (BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE + RGBQUAD_SIZE * Image->color_count);
 	if (fwrite(0, 1, Gap1_bytes, bmp_out) < Gap1_bytes)
 	{
 		perror("Error failed to write Gap1 to output file");

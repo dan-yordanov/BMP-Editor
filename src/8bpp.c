@@ -267,6 +267,7 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 	// we don't have anything after the pixel array so all the metadata is stored before the bfOffset
 	header->bfSize = dheader->biSizeImage + header->bfOffset; // includes size of metadata as well
 
+	
 	// not writing all at once to account for 2 bytes of padding after bfType(2 bytes)
 	if (fwrite(header, 2, 1, bmp_out) < 1 || fwrite(&(header->bfSize), BITMAPFILEHEADER_SIZE - 2, 1, bmp_out) < 1)
 	{
@@ -305,7 +306,7 @@ void write_8bpp(char *output_path, Image_8bpp *Image, BITMAPFILEHEADER *header, 
 	// writing Gap1 between color table and pixel array if there is one
 	// the differnce between the pixel array offset and the headers + color table size gives the size of Gap1 in bytes
 	// NOTE: we don't have to worry about Gap2 which comes after the pixel array as we don't use ICC
-	int Gap1_bytes = header->bfOffset - (BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE + RGBQUAD_SIZE * Image->color_count);
+	uint8_t Gap1_bytes = header->bfOffset - (BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE + RGBQUAD_SIZE * Image->color_count);
 	if (fwrite(0, 1, Gap1_bytes, bmp_out) < Gap1_bytes)
 	{
 		perror("Error failed to write Gap1 to output file");
