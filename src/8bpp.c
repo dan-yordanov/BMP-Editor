@@ -57,7 +57,7 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 	Image->width = abs(biWidth);
 
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4))
-	uint8_t padding = (4 - (biWidth * 8 / 8) % 4) % 4;
+	uint8_t padding_bytes = (4 - (biWidth * 8 / 8) % 4) % 4;
 
 	// allocating memory for the pixel array and writing to it
 	Image->pixel_arr = (Pixel_8bpp**) malloc(Image->height * sizeof(Pixel_8bpp*));
@@ -80,9 +80,9 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 			// freeing all previous rows
 			for (int r = i - 1; r >= 0; r--) 
 			{
-            	free(Image->pixel_arr[r]);
-        	}
-        	free(Image->pixel_arr);
+				free(Image->pixel_arr[r]);
+			}
+			free(Image->pixel_arr);
 			exit(BPP_ERROR);
 		}
 		
@@ -95,13 +95,13 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 			// freeing all rows up to current one
 			for (int r = i; r >= 0; r--) 
 			{
-            	free(Image->pixel_arr[r]);
-        	}
-        	free(Image->pixel_arr);
+				free(Image->pixel_arr[r]);
+			}
+			free(Image->pixel_arr);
 			exit(BPP_ERROR);
 		}
 
-		fseek(bmp_in, padding, SEEK_CUR); // skipping padding bytes
+		fseek(bmp_in, padding_bytes, SEEK_CUR); // skipping padding bytes
 	}
 
 

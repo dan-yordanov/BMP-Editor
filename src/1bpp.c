@@ -85,9 +85,9 @@ void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biH
 			// freeing all previous rows
 			for (int r = i - 1; r >= 0; r--) 
 			{
-            	free(Image->pixel_arr[r]);
-        	}
-        	free(Image->pixel_arr);
+				free(Image->pixel_arr[r]);
+			}
+			free(Image->pixel_arr);
 			exit(BPP_ERROR);
 		}
 		
@@ -100,9 +100,9 @@ void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biH
 			// freeing all rows up to current one
 			for (int r = i; r >= 0; r--) 
 			{
-            	free(Image->pixel_arr[r]);
-        	}
-        	free(Image->pixel_arr);
+				free(Image->pixel_arr[r]);
+			}
+			free(Image->pixel_arr);
 			exit(BPP_ERROR);
 		}
 
