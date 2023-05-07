@@ -89,7 +89,7 @@ void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 		exit(BMP_ERROR);
 	}
 
-	// check whether commpression method is BI_RGB (biCompression = 0 / no compression)
+	// Number of planes must be 1
 	if (dheader->biPlanes != 1)
 	{
 		fclose(bmp_in);
@@ -114,7 +114,7 @@ void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 		exit(BMP_ERROR);
 	}
 
-	// check whether 16bpp image has color table info
+	// check whether 16bpp image has color table info as it shouldn't
 	if (dheader->biBitCount == 16 && (dheader->biClrUsed != 0 || dheader->biClrImportant != 0))
 	{
 		fclose(bmp_in);
