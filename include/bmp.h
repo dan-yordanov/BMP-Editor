@@ -45,9 +45,26 @@ typedef struct
 	DWORD biClrImportant;  // 4 bytes
 } BITMAPINFOHEADER;
 
-// fucnctions for working with bmp metadata
 
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Reads metadata from bmp_in and stores it to struct vars header and dheader
+//
+// PARAMETERS: bmp_in - input bmp file, header - file header, dheader - Device Independent
+// Bitmap(DIB) header, which should be WINDOWS BITMAPINFOHEADER
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Prints formatted and readable strings that contain metadata stored in header
+// and dheader
+//
+// PARAMETERS: header - file header, dheader - Device Independent Bitmap(DIB) header, which
+// should be WINDOWS BITMAPINFOHEADER
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void print_meta(BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 #endif

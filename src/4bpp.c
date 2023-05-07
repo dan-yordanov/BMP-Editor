@@ -189,7 +189,7 @@ int rotate_4bpp(Image_4bpp *Image)
 	Pixel_4bpp **temp_arr = (Pixel_4bpp**) malloc(temp_height * sizeof(Pixel_4bpp*));
 	if (temp_arr == NULL)
 	{
-		return 1;
+		return -1;
 	}
 
 	for (int i = 0; i < temp_height; i++)
@@ -203,7 +203,7 @@ int rotate_4bpp(Image_4bpp *Image)
 				free(temp_arr[r]);
 			}
 			free(temp_arr);
-			return 1;
+			return -1;
 		}
 		// after allocating memory for the row we immediately write to it
 		for (int j = 0; j < temp_width; j++) 
@@ -320,6 +320,7 @@ void write_4bpp(char *output_path, Image_4bpp *Image, BITMAPFILEHEADER *header, 
 	}
 
 	free(Image->color_table);
+
 
 	// writing Gap1 between color table and pixel array if there is one
 	// the differnce between the pixel array offset and the headers + color table size gives the size of Gap1 in bytes

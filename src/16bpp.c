@@ -141,7 +141,7 @@ int rotate_16bpp(Image_16bpp *Image)
 	Pixel_16bpp **temp_arr = (Pixel_16bpp**) malloc(temp_height * sizeof(Pixel_16bpp*));
 	if (temp_arr == NULL)
 	{
-		return 1;
+		return -1;
 	}
 
 	for (int i = 0; i < temp_height; i++)
@@ -155,7 +155,7 @@ int rotate_16bpp(Image_16bpp *Image)
 				free(temp_arr[r]);
 			}
 			free(temp_arr);
-			return 1;
+			return -1;
 		}
 		// after allocating memory for the row we immediately write to it
 		for (int j = 0; j < temp_width; j++) 

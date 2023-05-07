@@ -115,17 +115,103 @@ typedef struct
 // functions for different bpp values
 
 // 1bpp
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Gets color table stored in bmp_in and stores it to the color table member
+// of the Image struct
+//
+// PARAMETERS: bmp_in - input bmp file, Image - struct that contains data about the
+// bmp image including a dynamic array that stores the color table, biClrUsed - member of
+// the dheader struct that stores the color count of the table
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void get_color_table_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD biClrUsed);
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Gets the pixel array stored in bmp_in and stores it to the pixel array
+// member of the Image struct, also reads height and width of image from header, and stores it
+// to Image struct members height and width
+//
+// PARAMETERS: bmp_in - input bmp file, Image - struct that contains data about the
+// bmp image including a 2d dynamic array that stores the pixel array, bfOffset - header
+// member that shows where the pixel array begins, biHeight - dheader member that stores the
+// height of the image, biWidth - dheader member that stores the width of the image
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Iterates over each instruction in the instruction array and calls the
+// respectful function (flip, invert, rotate)
+//
+// PARAMETERS: instructons - array where the inputted instructions are stored, Image -
+// struct that contains data about the bmp image
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void do_instructions_1bpp(char * instructions, Image_1bpp *Image);
 
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Flips the image by flipping the 2d array stored in the pixel array member
+// of the Image struct(n*k matrix) around its central y axis
+//
+// PARAMETERS: Image - struct that contains data about the bmp image including a 2d dynamic 
+// array that stores the pixel array
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void flip_1bpp(Image_1bpp *Image);
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Inverts the image by inverting each color stored in the color table
+//
+// PARAMETERS: Image - struct that contains data about the bmp image including a dynamic
+// array that stores the color table
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void invert_1bpp(Image_1bpp *Image);
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: 
+//
+// PARAMETERS: 
+//
+// RETURN VALUE: 0 on success, -1 on failure (NOTE: unlike other instructions this one
+// returns an exit code as it can fail at numerous points) 
+//------------------------------------------------------------------------------------------
 int rotate_1bpp(Image_1bpp *Image);
 
-
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Frees the allocated memory of the 2d dynamic pixel array
+//
+// PARAMETERS: Image - struct that contains data about the bmp image including a 2d dynamic 
+// array that stores the pixel array
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void free_pixel_arr_1bpp(Image_1bpp *Image);
+
+//------------------------------------------------------------------------------------------
+// DESCRIPTION: Writes the output file to the inputted output file using needed data: new 
+// metadata stored in headers, new color table and pixel array stored in the Image struct
+//
+// PARAMETERS: output_path - string that stores the inputted output filepath for the edited
+// bmp file, Image - struct that contains data about the bmp image including a 2d dynamic 
+// array that stores the pixel array and a 1d array that stores the color table, header - 
+// file header, dheader - Device Independent Bitmap(DIB) header, which should be WINDOWS 
+// BITMAPINFOHEADER
+//
+// RETURN VALUE: void
+//------------------------------------------------------------------------------------------
 void write_1bpp(char *output_path, Image_1bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
+
+
+// NOTE: no documentation for functions below as they work in practically the same way the above functions do
+// the only difference is in the invert function for the 16 bpp image which inverts the pixel values themselves
+// instead of a color table as there isn't one
 
 
 // 2bpp

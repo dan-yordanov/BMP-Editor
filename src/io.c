@@ -14,7 +14,7 @@ int get_input_path(int argc, char *argv[], char *input_path)
 		if (strlen(argv[1]) > MAX_FILEPATH_LEN)
 		{
 			fprintf(stderr, "Error: input filepath arg length is too big\n");
-			return 1;
+			return -1;
 		}
 		strcpy(input_path, argv[1]);
 	}
@@ -25,7 +25,7 @@ int get_input_path(int argc, char *argv[], char *input_path)
 		if (fgets(input_path, MAX_FILEPATH_LEN + 1, stdin) == NULL) 
 		{
 			perror("Error failed reading input for input path");
-			return 1;
+			return -1;
 		}
 		
 		// Remove \n if there is one else exit if \n isn't the only thing in the buffer
@@ -38,7 +38,7 @@ int get_input_path(int argc, char *argv[], char *input_path)
 			if (getchar() != '\n')
 			{
 				fprintf(stderr, "Error: input filepath length is too big\n");
-				return 1;
+				return -1;
 			}
 		}
 	}
@@ -46,7 +46,7 @@ int get_input_path(int argc, char *argv[], char *input_path)
 	if (strcmp(&input_path[strlen(input_path) - 4], ".bmp") != 0)
 	{
 		fprintf(stderr, "Error: input file is not bmp\n");
-		return 1;
+		return -1;
 	}
 }
 
@@ -60,7 +60,7 @@ int get_output_path(int argc, char *argv[], char *output_path)
 		if (strlen(argv[2]) > MAX_FILEPATH_LEN)
 		{
 			fprintf(stderr, "Error: output filepath arg length is too big\n");
-			return 1;
+			return -1;
 		}
 		strcpy(output_path, argv[2]);
 	}
@@ -71,7 +71,7 @@ int get_output_path(int argc, char *argv[], char *output_path)
 		if (fgets(output_path, MAX_FILEPATH_LEN + 1, stdin) == NULL) 
 		{
 			perror("Error failed reading input for ouput path");
-			return 1;
+			return -1;
 		}
 		
 		// Remove \n if there is one else exit if \n isn't the only thing in the buffer 
@@ -84,7 +84,7 @@ int get_output_path(int argc, char *argv[], char *output_path)
 			if (getchar() != '\n')
 			{
 				fprintf(stderr, "Error: ouput filepath length is too big\n");
-				return 1;
+				return -1;
 			}
 		}
 	}
@@ -93,7 +93,7 @@ int get_output_path(int argc, char *argv[], char *output_path)
 	if (strcmp(&output_path[strlen(output_path) - 4], ".bmp") != 0)
 	{
 		fprintf(stderr, "Error: output file is not bmp\n");
-		return 1;
+		return -1;
 	}
 
 	return 0;
@@ -109,7 +109,7 @@ int get_instructions(int argc, char *argv[], char *instructions)
 		if (strlen(argv[3]) > MAX_INSTRUCTIONS_LEN)
 		{
 			fprintf(stderr, "Error: too many instructions given\n");
-			return 1;
+			return -1;
 		}
 		strcpy(instructions, argv[3]);
 	}
