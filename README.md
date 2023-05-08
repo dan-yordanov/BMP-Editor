@@ -23,6 +23,8 @@ A simple bmp file editor that can flip, invert and rotate 1/2/4/8/16 bpp images.
 
 `build.bat` - batch script that builds the program
 
+![project flowchart](https://github.com/dan-yordanov/BMP-editor/blob/main/Flowchart.png)
+
 ### Requirements for the bmp file
 - Must use WINDOWS BITMAPINFOHEADER
 - No compression is used i.e. compression type is BI_RGB
