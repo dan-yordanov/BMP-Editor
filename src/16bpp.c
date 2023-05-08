@@ -5,14 +5,6 @@
 
 
 
-void free_pixel_arr_16bpp(Image_16bpp *Image)
-{
-	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
-	free(Image->pixel_arr);
-}
-
-
-
 void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
 {
 	// 16 bpp images shouldn't have a color table so bfOffset should be equal to sum header sizes
@@ -96,6 +88,14 @@ void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG b
 		}
 		flip_16bpp(Image);
 	}
+}
+
+
+
+void free_pixel_arr_16bpp(Image_16bpp *Image)
+{
+	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
+	free(Image->pixel_arr);
 }
 
 

@@ -1,6 +1,27 @@
 # BMP Editor
 
-A simple bmp file editor that can flip, invert and rotate 1/2/4/8/16 bpp images. 
+A simple bmp file editor that can flip, invert and rotate 1/2/4/8/16 bpp images.
+
+## File structure
+`src` folder:
+- `bmp.c` - includes functions to store and print metadata of bmp files
+- `io.c` - includes functions that get input bmp filepath, instruction set and output bmp filepath, either from cmd args or stdin input
+- `1bpp.c`, `2bpp.c`, `4bpp.c`, `8bpp.c`, `16bpp.c` - each provides functonality for the respectful images bit count like getting color table and pixel array, executing the instructions in the instruction set and writing the output bmp file
+
+`include` folder:
+- `bmp.h` - header file of `bmp.c`
+- `io.h` - header file of `io.c`
+- `bpp.h` - header file of `1bpp.c`, `2bpp.c`, `4bpp.c`, `8bpp.c`, `16bpp.c`
+
+`obj` folder - contains the .o files of the compiled .c files
+
+`bin` folder - contains the executable file `bmp-editor.exe`
+
+`samples` folder - contains sample bmp images with all used bit counts
+
+`main.c` - calls functions to get the filepaths and the instruction set and after checking the bit count calls the respectful functions to do the instructions and write the ouput file
+
+`build.bat` - batch script that builds the program
 
 ### Requirements for the bmp file
 - Must use WINDOWS BITMAPINFOHEADER
@@ -25,10 +46,13 @@ The program takes up to 3 optional command line arguments:
     - c - Rotate the image 90 degrees to the right
     - d - Stop reading instructions
 
-If no argument is given the user will be prompted to enter an input.
+If no argument is given the user will be prompted to enter an input for the repectful variable.
+Note: UTF-8 encoding should be enabled to display Cyrillic letters in the cmd console properly. In Windows cmd the command to do thats is "chcp 65001" and it is inclded in the build batch file.
+
 
 ### References
 - [BMP file format wiki](https://en.wikipedia.org/wiki/BMP_file_format)
 - [WINDOWS BITMAPINFOHEADER documentation](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader)
 - [BMP Suite - sample bmp images](http://entropymine.com/jason/bmpsuite/bmpsuite/html/bmpsuite.html)
 - [Tutorialspots - 16 bpp sample bmp images and explanation of the structure](https://tutorialspots.com/bmp-file-structure-analysis-by-php-part-2-1092.html)
+- [draw.io - used for generating the flowchart](https://www.drawio.com/)

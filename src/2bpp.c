@@ -6,14 +6,6 @@
 
 
 
-void free_pixel_arr_2bpp(Image_2bpp *Image)
-{
-	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
-	free(Image->pixel_arr);
-}
-
-
-
 void get_color_table_2bpp(FILE *bmp_in, Image_2bpp *Image, DWORD biClrUsed)
 {
 	// seek to right after headers
@@ -148,6 +140,15 @@ void get_pixelarr_2bpp(FILE *bmp_in, Image_2bpp *Image, DWORD bfOffset, LONG biH
 		flip_2bpp(Image);
 	}
 }
+
+
+
+void free_pixel_arr_2bpp(Image_2bpp *Image)
+{
+	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
+	free(Image->pixel_arr);
+}
+
 
 
 

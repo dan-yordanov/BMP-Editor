@@ -6,14 +6,6 @@
 
 
 
-void free_pixel_arr_4bpp(Image_4bpp *Image)
-{
-	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
-	free(Image->pixel_arr);
-}
-
-
-
 void get_color_table_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD biClrUsed)
 {
 	// seek to right after headers
@@ -147,6 +139,14 @@ void get_pixelarr_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD bfOffset, LONG biH
 		}
 		flip_4bpp(Image);
 	}
+}
+
+
+
+void free_pixel_arr_4bpp(Image_4bpp *Image)
+{
+	for (int i = 0; i < Image->height; i++) free(Image->pixel_arr[i]);
+	free(Image->pixel_arr);
 }
 
 
