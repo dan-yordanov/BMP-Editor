@@ -7,7 +7,7 @@
 
 void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth)
 {
-	// 16 bpp images shouldn't have a color table so bfOffset should be equal to sum header sizes
+	// 16 bpp images shouldn't have a color table so bfOffset should be equal to sum of header sizes
 	if (bfOffset != BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE)
 	{
 		fprintf(stderr, "Error: 16 bpp images shouldn't have a color table or other data between headers and pixel array\n");

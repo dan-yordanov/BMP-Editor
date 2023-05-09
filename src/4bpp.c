@@ -98,7 +98,7 @@ void get_pixelarr_4bpp(FILE *bmp_in, Image_4bpp *Image, DWORD bfOffset, LONG biH
 			exit(BPP_ERROR);
 		}
 
-		// iterating over each byte and the each 4 bit chunk in it, breaking when last chunk is reached
+		// iterating over each byte and then each 4 bit chunk in it, breaking when last chunk is reached
 		uint32_t counter = 0; // counts how many bits have been written, will break out of loop when it reaches biWidth
 
 		for (int byte = 0; byte < row_size; byte++)
