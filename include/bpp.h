@@ -4,10 +4,10 @@
 #include "bmp.h"
 
 #define RGBQUAD_SIZE 4
-#define BPP_ERROR 3
+#define BPP_ERROR 3 // used for an exit() code in the bpp .c files
 
 
-// Pixel and PixelArr structs for different bpp values
+// Pixel and Image structs for the different bpp values
 
 
 // RGBQUAD structure that's used in color tables (bpp <= 8 and uses little-endian)
@@ -32,9 +32,9 @@ typedef struct
 {
 	DWORD height; 
 	DWORD width;
-	Pixel_1bpp **pixel_arr;          // 2D array of pixels
-	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
-	DWORD color_count;               // count of colors in color table
+	Pixel_1bpp **pixel_arr;        // 2D array of pixels
+	RGBQUAD *color_table;          // 1D array of RGBQUAD values in the color table
+	DWORD color_count;             // count of colors in color table
 } Image_1bpp;
 
 
@@ -50,9 +50,9 @@ typedef struct
 {
 	DWORD height; 
 	DWORD width;
-	Pixel_2bpp **pixel_arr;          // 2D array of pixels
-	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
-	DWORD color_count;               // count of colors in color table
+	Pixel_2bpp **pixel_arr;        // 2D array of pixels
+	RGBQUAD *color_table;          // 1D array of RGBQUAD values in the color table
+	DWORD color_count;             // count of colors in color table
 } Image_2bpp;
 
 
@@ -68,9 +68,9 @@ typedef struct
 {
 	DWORD height; 
 	DWORD width;
-	Pixel_4bpp **pixel_arr;          // 2D array of pixels
-	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
-	DWORD color_count;               // count of colors in color table
+	Pixel_4bpp **pixel_arr;        // 2D array of pixels
+	RGBQUAD *color_table;          // 1D array of RGBQUAD values in the color table
+	DWORD color_count;             // count of colors in color table
 } Image_4bpp;
 
 
@@ -79,16 +79,16 @@ typedef struct
 
 typedef struct
 {
-	BYTE byte; // 1 byte
+	BYTE byte; // 1 byte/8 bits per pixel
 } Pixel_8bpp;
 
 typedef struct
 {
 	DWORD height; 
 	DWORD width;
-	Pixel_8bpp **pixel_arr;          // 2D array of pixels
-	RGBQUAD *color_table;            // 1D array of RGBQUAD values in the color table
-	DWORD color_count;               // count of colors in color table
+	Pixel_8bpp **pixel_arr;        // 2D array of pixels
+	RGBQUAD *color_table;          // 1D array of RGBQUAD values in the color table
+	DWORD color_count;             // count of colors in color table
 } Image_8bpp;
 
 
@@ -97,17 +97,17 @@ typedef struct
 
 typedef struct
 {
-	WORD blue : 5;       // 5 bits for red component
-	WORD green : 5;      // 5 bits for green component
-	WORD red : 5;        // 5 bits for blue component (+1 unused bit)
-	WORD unused_bit: 1;  // 1 bit unused (should be 0)
+	WORD blue : 5;                 // 5 bits for red component
+	WORD green : 5;                // 5 bits for green component
+	WORD red : 5;                  // 5 bits for blue component (+1 unused bit)
+	WORD unused_bit: 1;            // 1 bit unused (should be 0)
 } Pixel_16bpp;
 
 typedef struct 
 {
 	DWORD height; 
 	DWORD width;
-	Pixel_16bpp **pixel_arr;         // 2D array of pixels
+	Pixel_16bpp **pixel_arr;       // 2D array of pixels
 } Image_16bpp;
 
 
@@ -118,7 +118,7 @@ typedef struct
 
 //------------------------------------------------------------------------------------------
 // DESCRIPTION: Gets color table stored in bmp_in and stores it to the color table member
-// of the Image struct
+// of the Image struct and also determines the color count which is another member of Image
 //
 // PARAMETERS: bmp_in - input bmp file, Image - struct that contains data about the
 // bmp image including a dynamic array that stores the color table, biClrUsed - member of
@@ -130,8 +130,8 @@ void get_color_table_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD biClrUsed);
 
 //------------------------------------------------------------------------------------------
 // DESCRIPTION: Gets the pixel array stored in bmp_in and stores it to the pixel array
-// member of the Image struct, also reads height and width of image from header, and stores it
-// to Image struct members height and width
+// member of the Image struct, also reads height and width of image from header, and stores
+// it to Image struct members height and width
 //
 // PARAMETERS: bmp_in - input bmp file, Image - struct that contains data about the
 // bmp image including a 2d dynamic array that stores the pixel array, bfOffset - header
@@ -143,7 +143,7 @@ void get_color_table_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD biClrUsed);
 void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biHeight, LONG biWidth);
 
 //------------------------------------------------------------------------------------------
-// DESCRIPTION: Frees the allocated memory of the 2d dynamic pixel array
+// DESCRIPTION: Frees the allocated memory of the 2d dynamic pixel array in the Image struct
 //
 // PARAMETERS: Image - struct that contains data about the bmp image including a 2d dynamic 
 // array that stores the pixel array
@@ -153,11 +153,12 @@ void get_pixelarr_1bpp(FILE *bmp_in, Image_1bpp *Image, DWORD bfOffset, LONG biH
 void free_pixel_arr_1bpp(Image_1bpp *Image);
 
 //------------------------------------------------------------------------------------------
-// DESCRIPTION: Iterates over each instruction in the instruction array and calls the
-// respectful function (flip, invert, rotate)
+// DESCRIPTION: Iterates over each instruction in the instruction set and calls the
+// respectful function (flip, invert, rotate) which modifies the pixel array stored in Image
 //
 // PARAMETERS: instructons - array where the inputted instructions are stored, Image -
-// struct that contains data about the bmp image
+// struct that contains data about the bmp image including a 2d dynamic array that stores
+// the pixel array
 //
 // RETURN VALUE: void
 //------------------------------------------------------------------------------------------
@@ -185,18 +186,20 @@ void flip_1bpp(Image_1bpp *Image);
 void invert_1bpp(Image_1bpp *Image);
 
 //------------------------------------------------------------------------------------------
-// DESCRIPTION: 
+// DESCRIPTION: Rotates the image by 90 degrees to the right, by rotating the 2d array
+// stored in the pixel array member of the Image struct(n*k matrix)
 //
-// PARAMETERS: 
+// PARAMETERS: Image - struct that contains data about the bmp image including a 2d dynamic 
+// array that stores the pixel array 
 //
 // RETURN VALUE: 0 on success, -1 on failure (NOTE: unlike other instructions this one
-// returns an exit code as it can fail at numerous points) 
+// returns an exit code as it can fail at multiple points) 
 //------------------------------------------------------------------------------------------
 int rotate_1bpp(Image_1bpp *Image);
 
 //------------------------------------------------------------------------------------------
-// DESCRIPTION: Writes the output file to the inputted output file using needed data: new 
-// metadata stored in headers, new color table and pixel array stored in the Image struct
+// DESCRIPTION: Writes the output file to the inputted output filepath using needed data:
+// new metadata stored in headers, new color table and pixel array stored in Image struct
 //
 // PARAMETERS: output_path - string that stores the inputted output filepath for the edited
 // bmp file, Image - struct that contains data about the bmp image including a 2d dynamic 
@@ -209,9 +212,9 @@ int rotate_1bpp(Image_1bpp *Image);
 void write_1bpp(char *output_path, Image_1bpp *Image, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader);
 
 
-// NOTE: No documentation for the functions below as they work in practically the same way as the above functions.
-// The only difference is in the invert function for the 16 bpp image which inverts the pixel values in the 
-// pixel array themselves, instead of inverting values in a color table as there isn't one.
+// NOTE: No documentation for the functions below as they essentially have the same functionality as the functions above.
+// The only difference is in the invert function for the 16 bpp image which inverts the pixel values in the pixel array
+// themselves, instead of inverting values in a color table as there isn't one. (no get_color_table function as well)
 
 
 // 2bpp

@@ -8,7 +8,7 @@
 
 int get_input_path(int argc, char *argv[], char *input_path)
 {
-	// if argument was given use it
+	// if cmd argument was given use it
 	if (argc > 1)
 	{
 		if (strlen(argv[1]) > MAX_FILEPATH_LEN)
@@ -54,7 +54,7 @@ int get_input_path(int argc, char *argv[], char *input_path)
 
 int get_output_path(int argc, char *argv[], char *output_path)
 {
-	//if argument was given use it
+	//if cmd argument was given use it
 	if (argc > 2)
 	{
 		if (strlen(argv[2]) > MAX_FILEPATH_LEN)
@@ -103,7 +103,7 @@ int get_output_path(int argc, char *argv[], char *output_path)
 
 int get_instructions(int argc, char *argv[], char *instructions)
 {
-	// if argument was given use it
+	// if cmd argument was given use it
 	if (argc > 3)
 	{
 		if (strlen(argv[3]) > MAX_INSTRUCTIONS_LEN)

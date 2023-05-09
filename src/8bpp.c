@@ -113,7 +113,7 @@ void get_pixelarr_8bpp(FILE *bmp_in, Image_8bpp *Image, DWORD bfOffset, LONG biH
 		{
 			perror("Error rotating image to compensate for negative height");
 			fclose(bmp_in);
-			free(Image->pixel_arr);
+			free(Image->color_table);
 			free_pixel_arr_8bpp(Image);
 			exit(BPP_ERROR);
 		}
@@ -169,6 +169,7 @@ int rotate_8bpp(Image_8bpp *Image)
 	Pixel_8bpp **temp_arr = (Pixel_8bpp**) malloc(temp_height * sizeof(Pixel_8bpp*));
 	if (temp_arr == NULL)
 	{
+		perror("Error allocatng memory for temporary array in rotate function");
 		return -1;
 	}
 
@@ -177,6 +178,7 @@ int rotate_8bpp(Image_8bpp *Image)
 		temp_arr[i] = (Pixel_8bpp*) malloc(temp_width * sizeof(Pixel_8bpp));
 		if (temp_arr[i] == NULL)
 		{
+			perror("Error allocatng memory for temporary array in rotate function");
 			// freeing all previous rows
 			for (int r = i - 1; r >= 0; r--) 
 			{
@@ -223,7 +225,6 @@ void do_instructions_8bpp(char *instructions, Image_8bpp *Image)
 			case 'c':
 				if (rotate_8bpp(Image) != 0)
 				{
-					perror("Error rotating image");
 					free(Image->color_table);
 					free_pixel_arr_8bpp(Image);
 					exit(BPP_ERROR);

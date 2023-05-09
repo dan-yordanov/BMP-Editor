@@ -141,6 +141,7 @@ int rotate_16bpp(Image_16bpp *Image)
 	Pixel_16bpp **temp_arr = (Pixel_16bpp**) malloc(temp_height * sizeof(Pixel_16bpp*));
 	if (temp_arr == NULL)
 	{
+		perror("Error allocatng memory for temporary array in rotate function");
 		return -1;
 	}
 
@@ -149,6 +150,7 @@ int rotate_16bpp(Image_16bpp *Image)
 		temp_arr[i] = (Pixel_16bpp*) malloc(temp_width * sizeof(Pixel_16bpp));
 		if (temp_arr[i] == NULL)
 		{
+			perror("Error allocatng memory for temporary array in rotate function");
 			// freeing all previous rows
 			for (int r = i - 1; r >= 0; r--) 
 			{
@@ -195,7 +197,6 @@ void do_instructions_16bpp(char *instructions, Image_16bpp *Image)
 			case 'c':
 				if (rotate_16bpp(Image) != 0)
 				{
-					perror("Error rotating image");
 					free_pixel_arr_16bpp(Image);
 					exit(BPP_ERROR);
 				}

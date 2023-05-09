@@ -6,25 +6,25 @@
 
 #define BITMAPFILEHEADER_SIZE 14
 #define BITMAPINFOHEADER_SIZE 40
-#define BMP_ERROR 2
+#define BMP_ERROR 2        // used for an exit() code in bmp.c
 
 // some Windows data types
 
-typedef uint8_t  BYTE;  // 1 byte
-typedef uint16_t WORD;  // 2 bytes 
-typedef uint32_t DWORD; // 4 bytes
-typedef int32_t  LONG;  // 4 bytes (signed)
+typedef uint8_t  BYTE;     // 1 byte
+typedef uint16_t WORD;     // 2 bytes 
+typedef uint32_t DWORD;    // 4 bytes
+typedef int32_t  LONG;     // 4 bytes (signed)
 
 // Bitmap file header
 // size of struct = 16 bytes (14 + 2 padding)
 
 typedef struct 
 {
-	WORD  bfType;      // 2 bytes + 2 bytes padding (must be "BM")
-	DWORD bfSize;      // 4 bytes
-	WORD  bfReserved1; // 2 bytes (should be 0)
-	WORD  bfReserved2; // 2 bytes (should be 0)
-	DWORD bfOffset;	   // 4 bytes
+	WORD  bfType;          // 2 bytes + 2 bytes padding (must be "BM")
+	DWORD bfSize;          // 4 bytes
+	WORD  bfReserved1;     // 2 bytes (should be 0)
+	WORD  bfReserved2;     // 2 bytes (should be 0)
+	DWORD bfOffset;	       // 4 bytes
 } BITMAPFILEHEADER;
 
 // Window BITMAPINFOHEADER - the DIB header we're working with

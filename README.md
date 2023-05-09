@@ -6,7 +6,7 @@ A simple bmp file editor that can flip, invert and rotate 1/2/4/8/16 bpp images.
 `src` folder:
 - `bmp.c` - includes functions to store and print metadata of bmp files
 - `io.c` - includes functions that get input bmp filepath, instruction set and output bmp filepath, either from cmd args or stdin input
-- `1bpp.c`, `2bpp.c`, `4bpp.c`, `8bpp.c`, `16bpp.c` - each provides functonality for the respectful images bit count like getting color table and pixel array, executing the instructions in the instruction set and writing the output bmp file
+- `1bpp.c`, `2bpp.c`, `4bpp.c`, `8bpp.c`, `16bpp.c` - each provides functonality for the respectful image's bit count like getting the color table and pixel array, executing the instructions in the instruction set and writing the output bmp file
 
 `include` folder:
 - `bmp.h` - header file of `bmp.c`
@@ -25,16 +25,18 @@ A simple bmp file editor that can flip, invert and rotate 1/2/4/8/16 bpp images.
 
 ![project flowchart](https://github.com/dan-yordanov/BMP-editor/blob/main/Flowchart.png)
 
+
 ### Requirements for the bmp file
 - Must use WINDOWS BITMAPINFOHEADER
 - No compression is used i.e. compression type is BI_RGB
-- Image needs to be 1/2/4/8/16 bpp (16 bpp images must use RGB 555 format due to compression type)
-- File extension needs to be .bmp
+- Image needs to be 1/2/4/8/16 bpp (16 bpp images must use RGB 555 format as a consequence of the compression type)
+- File extension needs to be `.bmp`
+
 
 ### How it works
 - The program prompts the user to enter the filepath of the bmp image to be edited, if no such cmd argument is given. Afterwards the metadata of the given file is printed.
 - Next, the user is prompted to enter instructions and a filepath for the output bmp file if no such cmd arguments are given.
-- Afterwards the instructions are performed and the edited bmp is stored to the given output filepath.
+- Afterwards the instructions are performed and the edited bmp is written to the given output filepath.
 - Finally the metadata of the output bmp file is printed to the screen.
 
 
@@ -43,13 +45,13 @@ The program takes up to 3 optional command line arguments:
 1. Full filepath of the bmp file to be edited
 2. Full filepath of the output edited bmp file
 3. A string of characters resembling instructions
-    - a - Flip the image around vertical axis
-    - b - Invert the image
+    - a - Flip the image around it's vertical axis
+    - b - Invert the image i.e. invert the color of each pixel
     - c - Rotate the image 90 degrees to the right
     - d - Stop reading instructions
 
 If no argument is given the user will be prompted to enter an input for the repectful variable.
-Note: UTF-8 encoding should be enabled to display Cyrillic letters in the cmd console properly. In Windows cmd the command to do thats is "chcp 65001" and it is inclded in the build batch file.
+Note: UTF-8 encoding should be enabled to display Cyrillic letters in the cmd console properly. In Windows cmd the command to do thats is "chcp 65001" and it is inclded in the `build.bat` batch file.
 
 
 ### References

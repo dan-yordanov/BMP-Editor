@@ -8,21 +8,21 @@
 int main(int argc, char *argv[])
 {
 	BITMAPFILEHEADER header;   // file header
-	BITMAPINFOHEADER dheader;  // DIB header (working with WINDOWS BITMAPINFOHEADER)
+	BITMAPINFOHEADER dheader;  // DIB header (should be WINDOWS BITMAPINFOHEADER)
 
 
-	char input_path[MAX_FILEPATH_LEN + 1];
-	char output_path[MAX_FILEPATH_LEN + 1];
-	char instructions[MAX_INSTRUCTIONS_LEN + 1];
+	char input_path[MAX_FILEPATH_LEN + 1];        // filepath of input bmp
+	char instructions[MAX_INSTRUCTIONS_LEN + 1];  // instruction set
+	char output_path[MAX_FILEPATH_LEN + 1];       // filepath of output bmp
 
 
-	// reads arg/stdin, stores it in input_path and opens the file at that location
+	// read cmd arg/stdin for input bmp filepath and store it in input_path
 	if (get_input_path(argc, argv, input_path) != 0)
 	{
 		exit(IO_ERROR);
 	}
 	
-	// opening file at input path
+	// open file at input_path
 	FILE *bmp_in = fopen(input_path, "rb");
 	if (bmp_in == NULL)
 	{
@@ -30,28 +30,30 @@ int main(int argc, char *argv[])
 		exit(BMP_ERROR);
 	}
 
-	// reads metadata from bmp file at input_path and then stores it in vars header and dheader
+	// read metadata from bmp file at input_path and then store it in vars header and dheader
 	get_meta(bmp_in, &header, &dheader);
 
-	// prints metadata of input bmp which is stored in global vars header and dheader
+	// print metadata of input bmp stored in vars header and dheader
 	puts("\nInput file metadata: ");
 	print_meta(&header, &dheader);
 
-	// reads instructions and calls another function (do_instruction) to execute them
+	// read cmd arg/stdin for the instruction set and store it in instructions
 	if (get_instructions(argc, argv, instructions) != 0)
 	{
 		fclose(bmp_in);
 		exit(IO_ERROR);
 	}
 
-	// reads arg/input and stores it in output_path
+	// read cmd arg/stdin for ouput bmp filepath and store it in output_path
 	if (get_output_path(argc, argv, output_path) != 0)
 	{
 		fclose(bmp_in);
 		exit(IO_ERROR);
 	}
 	
-	// reads pixel array from bmp file and stores it in the appropriate struct
+	// check the image's bit count and call the respectful functions for the bpp
+	// get the color table(except for 16bpp) and pixel array, and then execute the given instructions
+	// finally write the ouput bmp file from the new data (modified metadata, color table and pixel array)
 	switch(dheader.biBitCount)
 	{
 		case 1:
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
 	}
 
 
-	// prints metadata of output bmp which is stored in now modified vars header and dheader
+	// print metadata of output bmp which is stored in now modified vars header and dheader
 	puts("\n\nOutput file metadata: ");
 	print_meta(&header, &dheader);
 

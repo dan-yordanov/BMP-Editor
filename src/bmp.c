@@ -5,7 +5,6 @@
 
 
 
-// prints data stored in header an dheader
 void print_meta(BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 {
 	// prints header info
@@ -42,8 +41,6 @@ void print_meta(BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 
 
 
-
-// reads metadata from input file and stores it in vars header and dheader
 void get_meta(FILE *bmp_in, BITMAPFILEHEADER *header, BITMAPINFOHEADER *dheader)
 {
 	// not reading all at once to account for 2 bytes of padding after biType(2 bytes)
