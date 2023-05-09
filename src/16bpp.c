@@ -14,11 +14,11 @@ void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG b
 		fclose(bmp_in);
 		exit(BPP_ERROR);
 	}
-
 	
 	fseek(bmp_in, bfOffset, SEEK_SET);
 
-	Image->height = abs(biHeight); // biHeight and biWidth can be negative meaning the rows/colums should be read in reverse
+	// biHeight and biWidth can be negative meaning the rows/colums should be read in reverse, will be accounted for later
+	Image->height = abs(biHeight);
 	Image->width = abs(biWidth);
 
 	// each rows gets a padding such that the row byte count is divisible by 4 (padding = (4 - (width * bpp / 8) % 4) % 4))
@@ -67,10 +67,10 @@ void get_pixelarr_16bpp(FILE *bmp_in, Image_16bpp *Image, DWORD bfOffset, LONG b
 	}
 
 
-	// we'll always set height and width in the output file header to be postive, to account for this we'll need to:
+	// we'll always set height and width in the output file dheader to be postive, to account for this we'll need to:
 	// if width is negative flip the image, if height is negative reverse the row order
 
-	// we already have a function to flip Image i.e. reverse column order if width is negative
+	// if width is negative we already have a function to flip Image i.e. reverse column order
 	if (biWidth < 0)
 	{
 		flip_16bpp(Image);

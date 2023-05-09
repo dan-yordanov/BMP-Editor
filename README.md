@@ -51,7 +51,8 @@ The program takes up to 3 optional command line arguments:
     - d - Stop reading instructions
 
 If no argument is given the user will be prompted to enter an input for the repectful variable.
-Note: UTF-8 encoding should be enabled to display Cyrillic letters in the cmd console properly. In Windows cmd the command to do thats is "chcp 65001" and it is inclded in the `build.bat` batch file.
+
+Note: UTF-8 encoding should be enabled to display Cyrillic letters in the cmd console properly. In Windows cmd the command to do that is "chcp 65001" and it is included in the `build.bat` batch file.
 
 
 ### References
