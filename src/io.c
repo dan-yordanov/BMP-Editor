@@ -149,7 +149,7 @@ int get_instructions(int argc, char *argv[], char *instructions)
 			count++;
 
 			// Clean buffer
-			while ((c = getchar()) != '\n' && !feof(stdin)); // feof(stdin) returns a non-zero value if eof is set
+			while ((c = getchar()) != '\n' && c != EOF);
 
 		} while(choice != 'd' && count != MAX_INSTRUCTIONS_LEN);
 	}
