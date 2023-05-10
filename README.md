@@ -17,7 +17,7 @@ A simple bmp file editor that can flip, invert and rotate 1/2/4/8/16 bpp images.
 
 `bin` folder - contains the executable file `bmp-editor.exe`
 
-`samples` folder - contains sample bmp images with all used bit counts
+`samples` folder - contains sample bmp images with all supported bit counts
 
 `main.c` - calls functions to get the filepaths and the instruction set and after checking the bit count calls the respectful functions to do the instructions and write the ouput file
 
